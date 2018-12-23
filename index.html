@@ -12,35 +12,101 @@
     <script src="/external/angular-sanitize.js"></script>
     <link rel="stylesheet" href="/external/select.min.css">
     <script src="/external/select.min.js"></script>
-    <script src="app.js"></script>
+    <script src="/external/moment-with-locales.min.js"></script>
+    <script src="/external/angular-moment-picker.min.js"></script>
+    <link rel="stylesheet" href="/external/angular-moment-picker.min.css">
+    <script src="app.js"></script> 
+    <link rel="stylesheet" href="style.css">
   </head>
-  <nav class="navbar navar-light bg-light">
-      <a href="#" class="navbar-brand">Journey Planning</a>
-  </nav>
+  <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Journey Planning</a>
+          </div>
+        </div>
+      </nav>
   <body ng-app="journey-planning" ng-controller="journeyPlanningCtrl">
-      <div style="padding: 0px 50px;"> 
+      <div style="padding: 0px 50px;">
             <div class="row">
                     <div class="col-md-4">
                         <div class="well">
-                            <h1 class="text-center">I want to go from</h1>
+                            <h1 class="text-center">I want to arrive between</h1>
                             <div class="row">
+                                <div class="row">
+                                    <div class="col-md-3"></div>
+                                    <div class="input-group col-md-6">
+                                            <span class="input-group-addon">Start time</span>
+                                            <input class="form-control"
+                                                ng-model="selectedStartDate"
+                                                placeholder="Select a start time..."
+                                                min-date="minStartDate"
+                                                moment-picker="startDate"
+                                                change="onStartDateChanged(newValue, oldValue)">
+                                        </div>
+                                        <div class="col-md-3"></div>
+                                </div>
+                                
+                                    <h3 class="text-center">and</h3>
+                                    <div class="row">
+                                        <div class="col-md-3"></div>
+                                            <div class="input-group col-md-6">
+                                                    <span class="input-group-addon">End time</span>
+                                                    <input class="form-control"
+                                                    ng-model="selectedEndDate" 
+                                                    placeholder="Select an end time..."
+                                                    min-date="minEndDate"
+                                                    max-date="maxEndDate"
+                                                    moment-picker="endDate"
+                                                    ng-disabled="!startDateHasChanged">
+                                            </div>
+                                            <div class="col-md-3"></div>
+                                    </div>
+                                    
+                                
+                            </div>
+                        </div>
+                        <div class="well">
+                            <div class="row">
+                                <h1 class="text-center">I want to go from</h1>
                                 <div class="col-md-5">
-                                        <ui-select ng-model="$parent.selectedRoadNumber" on-select="onRoadNumberSelected(selectedRoadNumber)">
+                                        <ui-select ng-model="$parent.selectedFromRoadNumber" on-select="onFromRoadNumberSelected(selectedFromRoadNumber)">
                                             <ui-select-match placeholder="Select or search for a road...">{{$select.selected.text}}</ui-select-match>
-                                            <ui-select-choices repeat="roadNumber in roadNumberArray | filter: $select.search">
+                                            <ui-select-choices repeat="roadNumber in entrySlipRoadArray | filter: $select.search">
                                                 <div ng-bind="roadNumber.text"></div>
                                             </ui-select-choices>
                                         </ui-select>
                                 </div>
                                 <div class="col-md-7">
-                                        <ui-select ng-model="$parent.selectedJunction" ng-disabled="$parent.selectedRoadNumber == null">
+                                        <ui-select ng-model="$parent.selectedFromJunction" ng-disabled="$parent.selectedFromRoadNumber == null">
                                                 <ui-select-match placeholder="Select or search for a junction...">{{$select.selected.roadName}}</ui-select-match>
-                                                <ui-select-choices repeat="junction in junctionsForSelectedRoadNumber | filter: $select.search">
+                                                <ui-select-choices repeat="junction in junctionsForSelectedFromRoadNumber | filter: $select.search">
                                                     <div ng-bind="junction.roadName"></div>
                                                 </ui-select-choices>
                                             </ui-select>
                                 </div>
                             </div>
+                            <div class="row">
+                                    <h1 class="text-center">to</h1>
+                                    <div class="col-md-5">
+                                            <ui-select ng-model="$parent.selectedToRoadNumber" on-select="onToRoadNumberSelected(selectedToRoadNumber)" ng-disabled="$parent.selectedFromRoadNumber == null">
+                                                <ui-select-match placeholder="Select or search for a road...">{{$select.selected.text}}</ui-select-match>
+                                                <ui-select-choices repeat="roadNumber in exitSlipRoadArray | filter: $select.search">
+                                                    <div ng-bind="roadNumber.text"></div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                    </div>
+                                    <div class="col-md-7">
+                                            <ui-select ng-model="$parent.selectedToJunction" ng-disabled="$parent.selectedToRoadNumber == null">
+                                                    <ui-select-match placeholder="Select or search for a junction...">{{$select.selected.roadName}}</ui-select-match>
+                                                    <ui-select-choices repeat="junction in junctionsForSelectedToRoadNumber | filter: $select.search">
+                                                        <div ng-bind="junction.roadName"></div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="well text-center">
+                            <button type="button" class="btn btn-success" ng-disabled="isPlanJourneyButtonEnabled">Plan my journey</button>
                         </div>
                     </div>
                     <div class="col-md-8">
