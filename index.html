@@ -106,7 +106,14 @@
                                 </div>
                         </div>
                         <div class="well text-center">
-                            <button type="button" class="btn btn-success" ng-disabled="isPlanJourneyButtonEnabled">Plan my journey</button>
+                            <div>
+                            <img id="loading-spinner" src="three-dots.svg" hidden />
+                            </div>
+                            <div id="journey-information" ng-hide="optimalRoute == null">
+                                <p>Your optimal journey time is <strong>{{ optimalRoute.travelTimeText }}</strong>.</p>
+                                <p> You should set off at <strong>{{ optimalRoute.departureTimeText }}</strong> to arrive for <strong>{{ optimalRoute.arrivalTimeText }}</strong>.</p>
+                            </div>
+                            <button id="plan-journey-button" type="button" class="btn btn-success btn-lg" ng-click="getRoutes()">Plan my journey</button>
                         </div>
                     </div>
                     <div class="col-md-8">

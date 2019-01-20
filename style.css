@@ -1,2 +1,5 @@
 .ui-select-toggle{display:flex;justify-content:space-between;}
 .ui-select-match-text{overflow-x:hidden; text-overflow:ellipsis;}
+#journey-information > p {
+    font-size: 135%;
+}
