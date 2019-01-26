@@ -1,4 +1,4 @@
-angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize'])
+angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 'chart.js'])
 .controller('journeyPlanningCtrl', function($scope, $http) {
 
     // Define API endpoints
@@ -6,7 +6,7 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize'])
     const JOURNEY_PLANNING_API = "http://localhost:8081/route/"
     const ENTRY_SLIP_ROAD_API = STATIC_DATA_API + "entrySlipRoad/all";
     const EXIT_SLIP_ROAD_API = STATIC_DATA_API + "exitSlipRoad/all";
-    const STRING_DATE_TIME_FORMAT = "hh:mm a";
+    const STRING_DATE_TIME_FORMAT = "HH:mm a";
 
     // Define variables
     
@@ -34,12 +34,36 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize'])
     $scope.onFromRoadNumberSelected = onFromRoadNumberSelected;
     $scope.onToRoadNumberSelected = onToRoadNumberSelected;
     $scope.onStartDateChanged = onStartDateChanged;
-    // $scope.isPlanJourneyButtonDisabled = isPlanJourneyButtonDisabled;
+    $scope.isPlanJourneyButtonDisabled = isPlanJourneyButtonDisabled;
     $scope.getRoutes = getRoutes;
 
     //UI Variables
     var loadingSpinner = $('#loading-spinner');
     var planJourneyButton = $('#plan-journey-button');
+
+    //Line graph variables
+    $scope.labels = [];
+    $scope.data = [];
+    $scope.options = {
+        scales: {
+          yAxes: [
+            {
+                scaleLabel: { 
+                display: true,
+                labelString: 'Journey time (mins)' 
+                }
+            }
+          ],
+          xAxes: [
+              {
+                  scaleLabel: {
+                      display: true,
+                      labelString: 'Departure time'
+                  }
+              }
+          ]
+        }
+      }; 
 
     // Run functions
     getEntrySlipRoads();
@@ -74,11 +98,12 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize'])
         planJourneyButton.prop('disabled', false);
     }
 
-    /* function isPlanJourneyButtonDisabled() {
-        return !$scope.startDateHasChanged 
-        || $scope.selectedFromJunction == null 
-        || $scope.selectedToJunction == null;
-    } */
+    function isPlanJourneyButtonDisabled() {
+        return $.isEmptyObject($scope.selectedStartDate)
+                || $.isEmptyObject($scope.selectedEndDate)
+                || $.isEmptyObject($scope.selectedFromJunction)
+                || $.isEmptyObject($scope.selectedToJunction);
+    }
 
     function getEntrySlipRoads() {
         $http.get(ENTRY_SLIP_ROAD_API).
@@ -116,6 +141,18 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize'])
             removeLoadingUI();
             $scope.returnedRoutes = response.data;
             setOptimalRoute();
+            setDepartureArrivalTimeText();
+            setTravelTimeText();
+            createGraphData();
+        });
+    }
+
+    function createGraphData() {
+        $scope.labels = [];
+        $scope.data = [];
+        $.each($scope.returnedRoutes, function(index, route) {
+            $scope.labels.push(route.departureTimeText);
+            $scope.data.push(route.minutesToTravel.toFixed(2));
         });
     }
 
@@ -126,33 +163,35 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize'])
                 return false;
             }
         });
-        setTravelTimeText();
-        setDepartureArrivalTimeText();
     }
 
     function setDepartureArrivalTimeText() {
-        var departureTime = moment($scope.optimalRoute.departureTimeMillis);
-        var arrivalTime = moment($scope.optimalRoute.arrivalTimeMillis);
-        $scope.optimalRoute.departureTimeText = departureTime.format(STRING_DATE_TIME_FORMAT);
-        $scope.optimalRoute.arrivalTimeText = arrivalTime.format(STRING_DATE_TIME_FORMAT);
+        $.each($scope.returnedRoutes, function(index, route) {
+            var departureTime = moment(route.departureTimeMillis);
+        var arrivalTime = moment(route.arrivalTimeMillis);
+        route.departureTimeText = departureTime.format(STRING_DATE_TIME_FORMAT);
+        route.arrivalTimeText = arrivalTime.format(STRING_DATE_TIME_FORMAT);
+        });
     }
 
     function setTravelTimeText() {
-        var travelTimeText = null;
-        var minutes = Math.round($scope.optimalRoute.minutesToTravel);
-        var hours = Math.floor(minutes / 60);
-
-        if (hours > 0) {
-            var minutesOfTheHour = minutes - (hours * 60);
-            if (minutesOfTheHour == 0) {
-                travelTimeText = hours + " hours";
+        $.each($scope.returnedRoutes, function(index, route) {
+            var travelTimeText = null;
+            var minutes = Math.round(route.minutesToTravel);
+            var hours = Math.floor(minutes / 60);
+    
+            if (hours > 0) {
+                var minutesOfTheHour = minutes - (hours * 60);
+                if (minutesOfTheHour == 0) {
+                    travelTimeText = hours + " hours";
+                } else {
+                    travelTimeText = hours + " hours, " + minutesOfTheHour + " minutes";
+                }
             } else {
-                travelTimeText = hours + " hours, " + minutesOfTheHour + " minutes";
+                travelTimeText = minutes + " minutes";
             }
-        } else {
-            travelTimeText = minutes + " minutes";
-        }
-        $scope.optimalRoute.travelTimeText = travelTimeText;
+            route.travelTimeText = travelTimeText;
+        });
     }
 
 })

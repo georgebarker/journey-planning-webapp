@@ -15,6 +15,8 @@
     <script src="/external/moment-with-locales.min.js"></script>
     <script src="/external/angular-moment-picker.min.js"></script>
     <link rel="stylesheet" href="/external/angular-moment-picker.min.css">
+    <script src="/external/Chart.min.js"></script>
+    <script src="/external/angular-chart.min.js"></script>
     <script src="app.js"></script> 
     <link rel="stylesheet" href="style.css">
   </head>
@@ -112,8 +114,14 @@
                             <div id="journey-information" ng-hide="optimalRoute == null">
                                 <p>Your optimal journey time is <strong>{{ optimalRoute.travelTimeText }}</strong>.</p>
                                 <p> You should set off at <strong>{{ optimalRoute.departureTimeText }}</strong> to arrive for <strong>{{ optimalRoute.arrivalTimeText }}</strong>.</p>
+                                <canvas id="line-graph" class="chart chart-line"
+                                chart-data="data"
+                                chart-labels="labels"
+                                chart-options="options"></canvas>
                             </div>
-                            <button id="plan-journey-button" type="button" class="btn btn-success btn-lg" ng-click="getRoutes()">Plan my journey</button>
+                            <button id="plan-journey-button" type="button" class="btn btn-success btn-lg" 
+                            ng-click="getRoutes()"
+                            ng-disabled="isPlanJourneyButtonDisabled()">Plan my journey</button>
                         </div>
                     </div>
                     <div class="col-md-8">
