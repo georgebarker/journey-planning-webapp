@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="/external/angular-moment-picker.min.css">
     <script src="/external/Chart.min.js"></script>
     <script src="/external/angular-chart.min.js"></script>
+    <link rel="stylesheet" href="/external/leaflet/leaflet.css">
+    <script src="/external/leaflet/leaflet.js"></script>
     <script src="app.js"></script> 
     <link rel="stylesheet" href="style.css">
   </head>
@@ -125,7 +127,9 @@
                         </div>
                     </div>
                     <div class="col-md-8">
-                        <div class="well">Map goes here</div>
+                        <div class="well">
+                            <div id="map"></div>
+                        </div>
                     </div>
                 </div>
       </div>

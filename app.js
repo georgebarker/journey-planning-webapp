@@ -7,6 +7,7 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
     const ENTRY_SLIP_ROAD_API = STATIC_DATA_API + "entrySlipRoad/all";
     const EXIT_SLIP_ROAD_API = STATIC_DATA_API + "exitSlipRoad/all";
     const STRING_DATE_TIME_FORMAT = "HH:mm a";
+    const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZ2VvcmdlYmFya2VyIiwiYSI6ImNqcmRza29jZTFtcWU0M24wc2s0dWxjZDYifQ.JrJ4RjCq-I0fJ9gxJ87SjA';
 
     // Define variables
     
@@ -41,6 +42,14 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
     var loadingSpinner = $('#loading-spinner');
     var planJourneyButton = $('#plan-journey-button');
 
+    //Map variables
+    var map = L.map('map');
+    $scope.layerGroup = {};
+
+    var southWestBounds = L.latLng(49.937457, -5.577327);
+    var northEastBounds = L.latLng(58.989541, 2.696686);
+    var bounds = L.latLngBounds(southWestBounds, northEastBounds);
+
     //Line graph variables
     $scope.labels = [];
     $scope.data = [];
@@ -68,8 +77,47 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
     // Run functions
     getEntrySlipRoads();
     getExitSlipRoads();
+    setupMap();
 
     // Functions
+    function setupMap() {
+        map.setView(bounds.getCenter(), 6);
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        minZoom: 6,
+        maxZoom: 18,
+        center: bounds.getCenter(),
+        id: 'mapbox.streets',
+        accessToken: MAPBOX_ACCESS_TOKEN
+        }).addTo(map);
+        map.setMaxBounds(bounds);
+    }
+
+    function setMapToOptimalRoute() {
+        //remove all previous layers
+        map.removeLayer($scope.layerGroup);
+        // $scope.layerGroup = {};
+
+        var pointList = [];
+        $.each($scope.optimalRoute.route, function(index, routePoint) {
+            var start = [routePoint.startNode.longitude, routePoint.startNode.latitude];
+            var end = [routePoint.endNode.longitude, routePoint.endNode.latitude];
+            pointList.push(start, end);
+        });
+        var polylineOptions = { color: '#4286f4' };
+        var polyline = new L.Polyline(pointList, polylineOptions);
+
+        var startMarker = new L.Marker(pointList[0])
+        .bindPopup($scope.selectedFromJunction.roadName);
+
+        var endMarker = new L.Marker(pointList[pointList.length - 1])
+        .bindPopup($scope.selectedToJunction.roadName);
+
+        $scope.layerGroup = L.layerGroup([polyline, startMarker, endMarker]);
+        $scope.layerGroup.addTo(map);
+        map.fitBounds(polyline.getBounds());
+    }
+
     function onStartDateChanged(newValue, oldValue) {
         $scope.startDateHasChanged = true;
         $scope.minEndDate = moment(newValue).add(15, 'minutes');
@@ -144,6 +192,7 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
             setDepartureArrivalTimeText();
             setTravelTimeText();
             createGraphData();
+            setMapToOptimalRoute();
         });
     }
 
