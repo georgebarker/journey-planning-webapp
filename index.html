@@ -90,24 +90,28 @@
                                 </div>
                             </div>
                             <div class="row">
-                                    <h1 class="text-center">to</h1>
-                                    <div class="col-md-5">
-                                            <ui-select ng-model="$parent.selectedToRoadNumber" on-select="onToRoadNumberSelected(selectedToRoadNumber)" ng-disabled="$parent.selectedFromRoadNumber == null">
-                                                <ui-select-match placeholder="Select or search for a road...">{{$select.selected.text}}</ui-select-match>
-                                                <ui-select-choices repeat="roadNumber in exitSlipRoadArray | filter: $select.search">
-                                                    <div ng-bind="roadNumber.text"></div>
-                                                </ui-select-choices>
-                                            </ui-select>
-                                    </div>
-                                    <div class="col-md-7">
-                                            <ui-select ng-model="$parent.selectedToJunction" ng-disabled="$parent.selectedToRoadNumber == null">
-                                                    <ui-select-match placeholder="Select or search for a junction...">{{$select.selected.roadName}}</ui-select-match>
-                                                    <ui-select-choices repeat="junction in junctionsForSelectedToRoadNumber | filter: $select.search">
-                                                        <div ng-bind="junction.roadName"></div>
-                                                    </ui-select-choices>
-                                                </ui-select>
-                                    </div>
+                                <h1 class="text-center">to</h1>
+                                <div class="col-md-5">
+                                        <ui-select ng-model="$parent.selectedToRoadNumber" on-select="onToRoadNumberSelected(selectedToRoadNumber)" ng-disabled="$parent.selectedFromRoadNumber == null">
+                                            <ui-select-match placeholder="Select or search for a road...">{{$select.selected.text}}</ui-select-match>
+                                            <ui-select-choices repeat="roadNumber in exitSlipRoadArray | filter: $select.search">
+                                                <div ng-bind="roadNumber.text"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
                                 </div>
+                                <div class="col-md-7">
+                                    <ui-select ng-model="$parent.selectedToJunction" ng-disabled="$parent.selectedToRoadNumber == null">
+                                        <ui-select-match placeholder="Select or search for a junction...">{{$select.selected.roadName}}</ui-select-match>
+                                        <ui-select-choices repeat="junction in junctionsForSelectedToRoadNumber | filter: $select.search">
+                                            <div ng-bind="junction.roadName"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                                <div class="text-center">
+                                    <p id="entry-slip-error-text" class="error" hidden>Could not retrieve entry slip roads.</p>
+                                    <p id="exit-slip-error-text" class="error" hidden>Could not retrieve exit slip roads.</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="well text-center">
                             <div>
@@ -124,7 +128,9 @@
                             <button id="plan-journey-button" type="button" class="btn btn-success btn-lg" 
                             ng-click="getRoutes()"
                             ng-disabled="isPlanJourneyButtonDisabled()">Plan my journey</button>
-                        </div>
+                                <p id="service-offline-error-text" class="error" hidden>Could not connect to the Journey Planning Service. Check your network connection and try again.</p>
+                                <p id="route-error-text" class="error" hidden>Sorry, a route could not be found for your journey!</p>
+                            </div>
                     </div>
                     <div class="col-md-8">
                         <div class="well">

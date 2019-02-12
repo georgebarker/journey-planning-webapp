@@ -12,3 +12,8 @@ body {
 #map {
     height: 80vh;
 }
+
+.error {
+    color: red;
+    font-weight: bold;
+}

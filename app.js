@@ -41,6 +41,10 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
     //UI Variables
     var loadingSpinner = $('#loading-spinner');
     var planJourneyButton = $('#plan-journey-button');
+    var entrySlipErrorText = $('#entry-slip-error-text');
+    var exitSlipErrorText = $('#exit-slip-error-text');
+    var serviceOfflineErrorText = $('#service-offline-error-text');
+    var unableToFindRouteErrorText = $('#route-error-text');
 
     //Map variables
     var map = L.map('map');
@@ -96,7 +100,10 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
     function setMapToOptimalRoute() {
         //remove all previous layers
         map.removeLayer($scope.layerGroup);
-        // $scope.layerGroup = {};
+
+        if ($scope.optimalRoute == null) {
+            return;
+        }
 
         var pointList = [];
         $.each($scope.optimalRoute.route, function(index, routePoint) {
@@ -135,6 +142,8 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
     }
 
     function setLoadingUI() {
+        serviceOfflineErrorText.hide();
+        unableToFindRouteErrorText.hide();
         loadingSpinner.show();
         planJourneyButton.text('Loading...');
         planJourneyButton.prop('disabled', true);
@@ -155,21 +164,25 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
 
     function getEntrySlipRoads() {
         $http.get(ENTRY_SLIP_ROAD_API).
-        then(function(response) {
+        then(function onSuccess(response) {
             $scope.entrySlipRoadMap = response.data;
             $scope.entrySlipRoadArray = $.map($scope.entrySlipRoadMap, function(value, key) {
                 return {text: key};
             });
+        }).catch(function onError(response) {
+            entrySlipErrorText.show();
         });
     }
 
     function getExitSlipRoads() {
         $http.get(EXIT_SLIP_ROAD_API).
-        then(function(response) {
+        then(function onSuccess(response) {
             $scope.exitSlipRoadMap = response.data;
             $scope.exitSlipRoadArray = $.map($scope.exitSlipRoadMap, function(value, key) {
                 return {text: key};
             });
+        }).catch(function onError(response) {
+            exitSlipErrorText.show();
         });
     }
 
@@ -185,7 +198,7 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
         + $scope.selectedEndDate;
 
         $http.get(URL).
-        then(function(response) {
+        then(function onSuccess(response) {
             removeLoadingUI();
             $scope.returnedRoutes = response.data;
             setOptimalRoute();
@@ -193,6 +206,16 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
             setTravelTimeText();
             createGraphData();
             setMapToOptimalRoute();
+        }).catch(function onError(response) {
+            removeLoadingUI();
+            $scope.optimalRoute = null; //clear the journey information
+            setMapToOptimalRoute(); //clear the map
+
+            if (response.data != null) {
+                unableToFindRouteErrorText.show();
+            } else {
+                serviceOfflineErrorText.show();
+            }
         });
     }
 
