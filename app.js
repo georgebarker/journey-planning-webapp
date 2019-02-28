@@ -128,7 +128,9 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
     function onStartDateChanged(newValue, oldValue) {
         $scope.startDateHasChanged = true;
         $scope.minEndDate = moment(newValue).add(15, 'minutes');
-        $scope.maxEndDate = moment($scope.selectedStartDate).add(1, 'days');
+        /*Functionality for 24 hour journey planning not yet implemented,
+            therefore the max end date has been limited to 23:45pm of the same day.*/
+        $scope.maxEndDate = moment($scope.selectedStartDate).hour(23).minute(45);
     }
 
     function onFromRoadNumberSelected(selectedFromRoadNumber) {
