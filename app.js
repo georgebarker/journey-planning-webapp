@@ -257,12 +257,24 @@ angular.module('journey-planning', ['moment-picker', 'ui.select', 'ngSanitize', 
             if (hours > 0) {
                 var minutesOfTheHour = minutes - (hours * 60);
                 if (minutesOfTheHour == 0) {
-                    travelTimeText = hours + " hours";
+                    if (hours == 1) {
+                        travelTimeText = hours + " hour";
+                    } else {
+                        travelTimeText = hours + " hours";
+                    }
                 } else {
-                    travelTimeText = hours + " hours, " + minutesOfTheHour + " minutes";
+                    if (hours == 1) {
+                        travelTimeText = hours + " hour, " + minutesOfTheHour + " minutes";
+                    } else {
+                        travelTimeText = hours + " hours, " + minutesOfTheHour + " minutes";
+                    }
                 }
             } else {
-                travelTimeText = minutes + " minutes";
+                if (minutes == 1) {
+                    travelTimeText = minutes + " minute";
+                } else {
+                    travelTimeText = minutes + " minutes";
+                }
             }
             route.travelTimeText = travelTimeText;
         });
